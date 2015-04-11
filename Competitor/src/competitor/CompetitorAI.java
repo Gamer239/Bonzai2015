@@ -11,7 +11,8 @@ public class CompetitorAI extends AI{
 
 	Set<Position> spawns = null;
 	Set<Base> bases = null;
-
+	int numUnitsPerTeam = 0;
+	
 	public CompetitorAI(){
 
 	}
@@ -25,15 +26,34 @@ public class CompetitorAI extends AI{
 		if (spawns == null){
 			spawns = turn.myTeam().spawns();
 			bases = turn.allBases();
+			numUnitsPerTeam = turn.myUnits().size();
 		}
 
 		Unit currentUnit = turn.actor();
 
 		if (!currentUnit.isSpawned()){
+			int numSpawned = 0;
+			
+			for (Unit unit: turn.myUnits()){
+				if (unit.isSpawned()){
+					numSpawned ++;
+				}
+			}
+			
 			for (Position possibleSpot: spawns){
 				if (!turn.hasUnitAt(possibleSpot)){
+					Perk newPerk;
+					
+					if (numSpawned == numUnitsPerTeam && numUnitsPerTeam > 3){
+						newPerk = Perk.LAYERS; // One Layer member for our team if we have more than 3
+					}else if (numSpawned == numUnitsPerTeam - 1 && numUnitsPerTeam > 3 || numSpawned == numUnitsPerTeam && numUnitsPerTeam <= 3){
+						newPerk = Perk.BUCKET;
+					}else{
+						newPerk = Perk.CLEATS;
+					}
+					
 					// Use Possible set
-					return new SpawnAction(possibleSpot, Perk.CLEATS);
+					return new SpawnAction(possibleSpot, newPerk);
 				}
 			}
 			// No spawn points available.
