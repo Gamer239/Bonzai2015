@@ -20,6 +20,15 @@ public class CompetitorAI extends AI{
 	public CompetitorAI(){
 
 	}
+	
+	private boolean privateBases(Turn turn){
+		
+		for (Base b: turn.allBases()){
+			if (!b.hasOwner())
+				return true;
+		}
+		return false;
+	}
 
 	/**
 	 *
@@ -56,20 +65,9 @@ public class CompetitorAI extends AI{
 		
 
 		if (!currentUnit.isSpawned()){
-			int numSpawned = 0;
-
-			// Calculate how many guys we have spanwed
-			/*for (Unit unit: turn.myUnits()){
-				if (unit.isSpawned()){
-					numSpawned ++;
-				}
-			}
-			System.out.println(numSpawned);*/
-
 			// Find the correct perk
 			Perk newPerk;
 
-			// TODO Wont work if a unit is killed
 			if (unit_id == numUnitsPerTeam-1 && numUnitsPerTeam > 3){
 				newPerk = Perk.LAYERS; // One Layer member for our team if we have more than 3
 				System.out.println("Layers");
@@ -108,7 +106,6 @@ public class CompetitorAI extends AI{
 				}
 				// Check to make sure there is no one at that spawn point and that we are not already heading to that base
 				else if (!turn.hasUnitAt(checkSpot)){
-					// Bugged Code: && !targetBases.contains(nearest(notOurBases, checkSpot))
 					// Find nearest base for this point
 					Base nearest = nearest(difference(notOurBases,targetBases), checkSpot);
 					int distance = nearest.position().distance(checkSpot);
@@ -144,6 +141,21 @@ public class CompetitorAI extends AI{
 			return new SpawnAction(targetSpawn, newPerk);
 
 		}else{
+			
+			boolean aggressor = false;
+			if (currentUnit.perk() == Perk.BUCKET || currentUnit.perk() == Perk.LAYERS){
+				aggressor = true;
+			}
+			
+			if (aggressor && !privateBases(turn) && currentUnit.snowballs() == 0 && turn.tileAt(currentUnit).snow() == 0){
+				// All bases are found. 
+				Set<Tile> tilesWithSnow = retain(turn.tiles(), new TileHasSnow());
+				Set<Position> positionsWithSnow = positions(tilesWithSnow); 
+				Set<Position> inMoveRange = turn.actor().positionsInMoveRange(); 
+				Set<Position> InRangeAndSnowy = intersect(positionsWithSnow, inMoveRange);
+				goals[unit_id] = nearest(InRangeAndSnowy, currentUnit);
+				return new MoveAction(goals[unit_id]);
+			}
 			
 			//gather some snow
 			if (unit_id >= 2 && turn.tileAt(currentUnit).snow() > 0)
