@@ -11,6 +11,7 @@ public class CompetitorAI extends AI{
 
 	Set<Position> spawns = null;
 	Set<Base> bases = null;
+	Position[] goals = null;
 	int numUnitsPerTeam = 0;
 
 	Set<Base> targetBases = null;
@@ -24,18 +25,32 @@ public class CompetitorAI extends AI{
 	 *
 	 **/
 	public Action action(Turn turn) {
+		
+		Unit currentUnit = turn.actor();
+		
+		//fetch the unit id
+		Object[] player_array = turn.myUnits().toArray();
+		int unit_id = 0;
+		for (unit_id = 0; unit_id < player_array.length; unit_id++)
+		{
+			if (player_array[unit_id] == currentUnit)
+			{
+				break;
+			}
+		}
 
 		// Setup
 		if (spawns == null){
 			spawns = turn.myTeam().spawns();
 			bases = turn.allBases();
 			numUnitsPerTeam = turn.myUnits().size();
+			goals = new Position[numUnitsPerTeam];
 			targetBases = turn.allBases();
 			targetBases.clear();
 			
 		}
 
-		Unit currentUnit = turn.actor();
+		
 
 		if (!currentUnit.isSpawned()){
 			int numSpawned = 0;
@@ -115,15 +130,31 @@ public class CompetitorAI extends AI{
 
 		}else{
 
-
+			if (unit_id >= 2 && turn.tileAt(currentUnit).snow() > 0)
+			{
+				return new GatherAction();
+			}
 			// Standing on a base
-			if (turn.hasBaseAt(currentUnit.position())){
+			if (turn.hasBaseAt(currentUnit.position()) && !nearest(turn.allBases(), currentUnit).isOwnedBy(turn.myTeam()))
+			{
 				return new CaptureAction();
 			}
 
 			// If there is an empty base, go after it.
-			Base near = nearest(turn.allBases(), currentUnit);
-			return new MoveAction(near.position());
+			
+			Base near;
+			if (unit_id >= 2)
+			{
+				near = furthest(turn.allBases(), currentUnit);
+				goals[unit_id] = near.position();
+			}
+			else if (unit_id < 2)
+			{
+				near = nearest(turn.allBases(), currentUnit);
+				goals[unit_id] = near.position();
+			}
+			
+			return new MoveAction(goals[unit_id]);
 		}
 
 
