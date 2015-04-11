@@ -153,8 +153,11 @@ public class CompetitorAI extends AI{
 				Set<Position> positionsWithSnow = positions(tilesWithSnow); 
 				Set<Position> inMoveRange = turn.actor().positionsInMoveRange(); 
 				Set<Position> InRangeAndSnowy = intersect(positionsWithSnow, inMoveRange);
-				goals[unit_id] = nearest(InRangeAndSnowy, currentUnit);
-				return new MoveAction(goals[unit_id]);
+				if (InRangeAndSnowy.size() > 0){
+					// May be cases where you arent in range of snow
+					goals[unit_id] = nearest(InRangeAndSnowy, currentUnit);
+					return new MoveAction(goals[unit_id]);
+				}
 			}
 			
 			//gather some snow
