@@ -15,6 +15,7 @@ public class CompetitorAI extends AI{
 	Set<Position> spawns = null;
 	Set<Base> bases = null;
 	Position[] goals = null;
+	boolean[] alive = null;
 	int numUnitsPerTeam = 0;
 	Color color = null;
 
@@ -159,10 +160,18 @@ public class CompetitorAI extends AI{
 			bases = turn.allBases();
 			numUnitsPerTeam = turn.myUnits().size();
 			goals = new Position[numUnitsPerTeam];
+			alive = new boolean[numUnitsPerTeam];
 			targetBases = turn.allBases();
 			targetBases.clear();
 			color = turn.myTeam().color();
 
+		}
+		
+		int x = 0;
+		for (Unit u : turn.myUnits())
+		{
+			alive[x] = u.isSpawned();
+			x++;
 		}
 
 		// List all not-our bases
@@ -263,7 +272,7 @@ public class CompetitorAI extends AI{
 					flag = false;
 					for ( int i = 0; i < numUnitsPerTeam; i++ )
 					{
-						if ( goals[i] == goals[unit_id])
+						if ( goals[i] == goals[unit_id] && alive[i] == true)
 						{
 							flag = true;
 						}
@@ -349,7 +358,7 @@ public class CompetitorAI extends AI{
 					flag = false;
 					for ( int i = 0; i < numUnitsPerTeam; i++ )
 					{
-						if ( goals[i] == goals[unit_id])
+						if ( goals[i] == goals[unit_id] && alive[i] == true)
 						{
 							flag = true;
 						}
@@ -373,7 +382,7 @@ public class CompetitorAI extends AI{
 					flag = false;
 					for ( int i = 0; i < numUnitsPerTeam; i++ )
 					{
-						if ( goals[i] == goals[unit_id])
+						if ( goals[i] == goals[unit_id] && alive[i] == true)
 						{
 							flag = true;
 						}
@@ -417,7 +426,7 @@ public class CompetitorAI extends AI{
 						flag = false;
 						for ( int i = 0; i < numUnitsPerTeam; i++ )
 						{
-							if ( goals[i] == goals[unit_id])
+							if ( goals[i] == goals[unit_id] && alive[i] == true)
 							{
 								flag = true;
 							}
