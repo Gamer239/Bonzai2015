@@ -24,28 +24,28 @@ public class CompetitorAI extends AI{
 	public CompetitorAI(){
 
 	}
-	
+
 	private boolean privateBases(Turn turn){
-		
+
 		for (Base b: turn.allBases()){
 			if (!b.hasOwner())
 				return true;
 		}
 		return false;
 	}
-	
+
 	private boolean canCaptureBaseWithoutStalement(Turn turn, Unit currentUnit){
-		
+
 		Base base = turn.baseAt(currentUnit);
-		
+
 		Set<Position> tilesForBase = base.coverage();
-		
+
 		HashMap<Team, Integer> numPerBase = new HashMap<Team, Integer>();
-		
+
 		for (Position p: tilesForBase){
 			if (turn.hasUnitAt(p)){
 				Unit unitAtP = turn.unitAt(p);
-				
+
 				if (!numPerBase.containsKey(unitAtP.team())){
 					numPerBase.put(unitAtP.team(), 1);
 				}else{
@@ -53,9 +53,9 @@ public class CompetitorAI extends AI{
 				}
 			}
 		}
-		
+
 		int ourTeam = numPerBase.get(turn.myTeam());
-		
+
 		for (Team t: numPerBase.keySet()){
 			if (t == turn.myTeam())
 				continue;
@@ -66,50 +66,62 @@ public class CompetitorAI extends AI{
 				}
 			}
 		}
-		
+
 		System.out.println("CAPTURE THAT BASE");
 		return true;
 	}
-	
+
 	private Base getBestBase(Turn turn, Unit currentUnit, boolean aggressive){
-		
+
 		Set<Base> bases = difference(turn.allBases(), turn.myBases());
-		
+
 		int maxNumEnemies = 1000000000;
 		Set<Base> bestBase = new HashSet<Base>();
-		
-		for (Base base: bases){
-			Set<Tile> allTiles = turn.tiles();
-			
-			int numEnemiesAtThisBase = 0;
-			
-			for (Tile t: allTiles){
-				
-				// TODO Tweak here as needed
-				if (t.position().distance(base.position()) <=4){
-					// Acceptable distance to check 
-					if (turn.hasUnitAt(t)){
-						// Unit at t.
-						Unit unit = turn.unitAt(t);
-						
-						if (unit.team() != turn.myTeam()){
-							numEnemiesAtThisBase += 1;
+
+		baseCheck:
+			for (Base base: bases){
+
+				for (int i = 0; i< goals.length; i ++){
+					if (goals[i] == null){
+						continue;
+					}else if (goals[i] == base.position()){
+						continue baseCheck;
+					}else{
+						continue;
+					}
+				}
+
+				Set<Tile> allTiles = turn.tiles();
+
+				int numEnemiesAtThisBase = 0;
+
+				for (Tile t: allTiles){
+
+					// TODO Tweak here as needed
+					if (t.position().distance(base.position()) <=4){
+						// Acceptable distance to check 
+						if (turn.hasUnitAt(t)){
+							// Unit at t.
+							Unit unit = turn.unitAt(t);
+
+							if (unit.team() != turn.myTeam()){
+								numEnemiesAtThisBase += 1;
+							}
 						}
 					}
 				}
+
+				if (numEnemiesAtThisBase < maxNumEnemies){
+					bestBase.clear();
+					bestBase.add(base);
+				}else if (numEnemiesAtThisBase == maxNumEnemies){
+					bestBase.add(base);
+				}
 			}
-			
-			if (numEnemiesAtThisBase < maxNumEnemies){
-				bestBase.clear();
-				bestBase.add(base);
-			}else if (numEnemiesAtThisBase == maxNumEnemies){
-				bestBase.add(base);
-			}
-		}
-		
+
 		int randomBase = (int)(Math.random() * bestBase.size());
 		int numBasesLookedAt = 0;
-		
+
 		for (Base base: bestBase){
 			if (numBasesLookedAt == randomBase){
 				return base;
@@ -117,8 +129,8 @@ public class CompetitorAI extends AI{
 				numBasesLookedAt ++;
 			}
 		}
-		
-		
+
+
 		return any(difference(turn.allBases(), turn.myBases()));
 	}
 
@@ -126,9 +138,9 @@ public class CompetitorAI extends AI{
 	 *
 	 **/
 	public Action action(Turn turn) {
-		
+
 		Unit currentUnit = turn.actor();
-		
+
 		//fetch the unit id
 		Object[] player_array = turn.myUnits().toArray();
 		int unit_id = 0;
@@ -149,13 +161,13 @@ public class CompetitorAI extends AI{
 			targetBases = turn.allBases();
 			targetBases.clear();
 			color = turn.myTeam().color();
-			
+
 		}
-		
+
 		// List all not-our bases
 		Set<Base> notOurBases = difference(bases, turn.myBases()); 
 
-		
+
 
 		if (!currentUnit.isSpawned()){
 			// Find the correct perk
@@ -172,7 +184,7 @@ public class CompetitorAI extends AI{
 				System.out.println("Cleats");
 			}
 
-			
+
 
 			int shortestDistance = 100000000;
 			int farthestDistance = 100000000;
@@ -186,7 +198,7 @@ public class CompetitorAI extends AI{
 					System.out.println("Skipping spawn pt.");
 					continue;
 				}
-				
+
 				// Aggressors
 				if (newPerk == Perk.BUCKET || newPerk == Perk.LAYERS && !turn.hasUnitAt(checkSpot)){
 					Base farthest = furthest(notOurBases, checkSpot);
@@ -210,12 +222,12 @@ public class CompetitorAI extends AI{
 					}
 				}
 			}
-			
+
 			if (targetSpawn == null){
 				targetSpawn = any(spawns);
 				System.out.println("Failed to find spawn... selecting anything");
 			}
-			
+
 			System.out.println("Selected spawn pt.");
 
 			if (newPerk == Perk.BUCKET || newPerk == Perk.LAYERS){
@@ -225,7 +237,7 @@ public class CompetitorAI extends AI{
 				// Passive
 				targetBases.add(nearest(notOurBases, targetSpawn));
 			}
-			
+
 			goals[unit_id] = target.position();
 
 
@@ -234,18 +246,18 @@ public class CompetitorAI extends AI{
 			return new SpawnAction(targetSpawn, newPerk);
 
 		}else{
-			
+
 			boolean aggressor = false;
 			if (currentUnit.perk() == Perk.BUCKET || currentUnit.perk() == Perk.LAYERS){
 				aggressor = true;
 			}
-			
+
 			// Standing on a base
 			if (turn.hasBaseAt(currentUnit.position()) && !turn.baseAt(currentUnit.position()).isOwnedBy(turn.myTeam()))
 			{
 				return new CaptureAction();
 			}
-			
+
 			// If there is a nearby base that is capturable, go get it.
 			if (aggressor && !privateBases(turn) && currentUnit.snowballs() == 0 && turn.tileAt(currentUnit).snow() == 0  &&currentUnit.position().distance(goals[unit_id]) > 7){
 				// All bases are found. 
@@ -259,8 +271,8 @@ public class CompetitorAI extends AI{
 					return new MoveAction(goals[unit_id]);
 				}
 			}
-			
-			
+
+
 			//gather some snow
 			if (/*unit_id >= 2 &&*/ turn.tileAt(currentUnit).snow() > 0 && currentUnit.position().distance(goals[unit_id]) > 4)
 			{
@@ -271,7 +283,7 @@ public class CompetitorAI extends AI{
 			if (any(currentUnit.enemyUnitsInThrowRange()) != null && currentUnit.snowballs() > 0)
 			{
 				System.out.println("throw");
-				
+
 				int lowestHealth = 3;
 				Unit targetUnit = any(currentUnit.enemyUnitsInThrowRange());
 				for(Unit enemyUnit: currentUnit.enemyUnitsInThrowRange()){
@@ -289,12 +301,12 @@ public class CompetitorAI extends AI{
 				}
 				return new ThrowAction(targetUnit.position());
 			}
-			
-			
+
+
 
 
 			// If there is an empty base, go after it.
-			
+
 			Base near;
 			// group up?
 			if (unit_id >= 2 && goals[unit_id] == currentUnit.position())
@@ -320,7 +332,7 @@ public class CompetitorAI extends AI{
 					}
 					j++;
 				}
-				
+
 			}
 			// go find a base that no one else is using
 			else if (goals[unit_id] == null)
@@ -342,7 +354,7 @@ public class CompetitorAI extends AI{
 				}
 			}
 
-			
+
 			//check if the base that your going for is taken already
 			if (turn.baseAt(goals[unit_id]).isOwnedBy(turn.myTeam()))
 			{
@@ -355,7 +367,7 @@ public class CompetitorAI extends AI{
 				enemyPositions.add(e.position());
 			}
 			Set<Position> res = union(turn.baseAt(goals[unit_id]).coverage(), enemyPositions);
-			
+
 			if (res.size() != turn.baseAt(goals[unit_id]).coverage().size())
 			{
 				System.out.println("size on target base " + res.size());
@@ -375,9 +387,9 @@ public class CompetitorAI extends AI{
 					j++;
 				}
 			}
-			
-			
-				
+
+
+
 			if (currentUnit.position().distance(nearest(notOurBases, currentUnit.position()).position()) <= 4)
 			{
 				boolean flag = false;
@@ -393,7 +405,7 @@ public class CompetitorAI extends AI{
 					goals[unit_id] = nearest(notOurBases, currentUnit.position()).position();
 				}
 			}
-			
+
 			if ( turn.hasBaseAt(currentUnit.position()) && canCaptureBaseWithoutStalement(turn, currentUnit) == false )
 			{
 				boolean flag = true;
@@ -412,9 +424,9 @@ public class CompetitorAI extends AI{
 					j++;
 				}
 			}
-			
+
 			//check if there is a teammate on a base
-			
+
 			return new MoveAction(goals[unit_id]);
 		}
 
