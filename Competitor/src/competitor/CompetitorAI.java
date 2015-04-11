@@ -152,6 +152,15 @@ public class CompetitorAI extends AI{
 				break;
 			}
 		}
+		
+		// Check for dead dudes
+		for (unit_id = 0; unit_id < player_array.length; unit_id++)
+		{
+			if (!((Unit)player_array[unit_id]).isSpawned())
+			{
+				goals[unit_id] = null;
+			}
+		}
 
 		// Setup
 		if (spawns == null){
