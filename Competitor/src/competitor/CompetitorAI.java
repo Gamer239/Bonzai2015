@@ -180,26 +180,63 @@ public class CompetitorAI extends AI{
 			}
 			else
 			{
-				goals[unit_id] = nearest(notOurBases, currentUnit).position();
+				//goals[unit_id] = nearest(notOurBases, currentUnit).position();
 			}
 
 			// If there is an empty base, go after it.
 			
 			Base near;
+			// group up?
 			if (unit_id >= 2 && goals[unit_id] == currentUnit.position())
 			{
 				near = furthest(notOurBases, currentUnit);
 				goals[unit_id] = near.position();
 			}
+			// go to a new place
 			else if (unit_id < 2 && goals[unit_id] == currentUnit.position())
 			{
-				near = nearest(notOurBases, currentUnit);
-				goals[unit_id] = near.position();
+				boolean flag = true;
+				int j = 0;
+				while(flag && j < 50)
+				{
+					goals[unit_id] = any(notOurBases).position();
+					flag = false;
+					for ( int i = 0; i < numUnitsPerTeam; i++ )
+					{
+						if ( goals[i] == goals[unit_id])
+						{
+							flag = true;
+						}
+					}
+					j++;
+				}
+				
 			}
+			// go find a base that no one else is using
 			else if (goals[unit_id] == null)
 			{
-				near = nearest(notOurBases, currentUnit);
-				goals[unit_id] = near.position();
+				boolean flag = true;
+				int j = 0;
+				while(flag && j < 50)
+				{
+					goals[unit_id] = any(notOurBases).position();
+					flag = false;
+					for ( int i = 0; i < numUnitsPerTeam; i++ )
+					{
+						if ( goals[i] == goals[unit_id])
+						{
+							flag = true;
+						}
+					}
+					j++;
+				}
+			}
+
+			
+			//check if the base that your going for is taken already
+			if (turn.baseAt(goals[unit_id]).isOwnedBy(turn.myTeam()))
+			{
+				goals[unit_id] = nearest(notOurBases, currentUnit.position()).position();
 			}
 			
 			return new MoveAction(goals[unit_id]);
