@@ -114,6 +114,7 @@ public class CompetitorAI extends AI{
 				if (numEnemiesAtThisBase < maxNumEnemies){
 					bestBase.clear();
 					bestBase.add(base);
+					maxNumEnemies = numEnemiesAtThisBase;
 				}else if (numEnemiesAtThisBase == maxNumEnemies){
 					bestBase.add(base);
 				}
