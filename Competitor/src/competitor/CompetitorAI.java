@@ -147,6 +147,7 @@ public class CompetitorAI extends AI{
 				aggressor = true;
 			}
 			
+			// If there is a nearby base that is capturable, go get it.
 			if (aggressor && !privateBases(turn) && currentUnit.snowballs() == 0 && turn.tileAt(currentUnit).snow() == 0){
 				// All bases are found. 
 				Set<Tile> tilesWithSnow = retain(turn.tiles(), new TileHasSnow());
@@ -170,7 +171,23 @@ public class CompetitorAI extends AI{
 			if (any(currentUnit.enemyUnitsInThrowRange()) != null && currentUnit.snowballs() > 0)
 			{
 				System.out.println("throw");
-				return new ThrowAction(any(currentUnit.enemyUnitsInThrowRange()).position());
+				
+				int lowestHealth = 3;
+				Unit targetUnit = any(currentUnit.enemyUnitsInThrowRange());
+				for(Unit enemyUnit: currentUnit.enemyUnitsInThrowRange()){
+					if (enemyUnit.warmth() <= lowestHealth){
+						if (turn.hasBaseAt(enemyUnit)){
+							targetUnit = enemyUnit;
+							lowestHealth = targetUnit.warmth();
+							System.out.println("Throw at unit on base");
+						}
+					}else if (enemyUnit.warmth() < lowestHealth){
+						targetUnit = enemyUnit;
+						lowestHealth = targetUnit.warmth();
+						System.out.println("Lower health unit found!  EXTERMINATE!");
+					}
+				}
+				return new ThrowAction(targetUnit.position());
 			}
 			
 			// Standing on a base
