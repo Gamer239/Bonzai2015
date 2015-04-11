@@ -49,6 +49,9 @@ public class CompetitorAI extends AI{
 			targetBases.clear();
 			
 		}
+		
+		// List all not-our bases
+		Set<Base> notOurBases = difference(bases, turn.myBases()); 
 
 		
 
@@ -78,8 +81,7 @@ public class CompetitorAI extends AI{
 				System.out.println("Cleats");
 			}
 
-			// List all not-our bases
-			Set<Base> notOurBases = difference(bases, turn.myBases()); 
+			
 
 			int shortestDistance = 100000000;
 			int farthestDistance = 100000000;
@@ -142,28 +144,46 @@ public class CompetitorAI extends AI{
 			return new SpawnAction(targetSpawn, newPerk);
 
 		}else{
-
+			
+			//gather some snow
 			if (unit_id >= 2 && turn.tileAt(currentUnit).snow() > 0)
 			{
+				System.out.println("gather");
 				return new GatherAction();
 			}
+			// throw at an enemy
+			if (any(currentUnit.enemyUnitsInThrowRange()) != null && currentUnit.snowballs() > 0)
+			{
+				System.out.println("throw");
+				return new ThrowAction(any(currentUnit.enemyUnitsInThrowRange()).position());
+			}
+			
 			// Standing on a base
-			if (turn.hasBaseAt(currentUnit.position()) && !nearest(turn.allBases(), currentUnit).isOwnedBy(turn.myTeam()))
+			if (turn.hasBaseAt(currentUnit.position()) && !turn.baseAt(currentUnit.position()).isOwnedBy(turn.myTeam()))
 			{
 				return new CaptureAction();
+			}
+			else
+			{
+				goals[unit_id] = nearest(notOurBases, currentUnit).position();
 			}
 
 			// If there is an empty base, go after it.
 			
 			Base near;
-			if (unit_id >= 2)
+			if (unit_id >= 2 && goals[unit_id] == currentUnit.position())
 			{
-				near = furthest(turn.allBases(), currentUnit);
+				near = furthest(notOurBases, currentUnit);
 				goals[unit_id] = near.position();
 			}
-			else if (unit_id < 2)
+			else if (unit_id < 2 && goals[unit_id] == currentUnit.position())
 			{
-				near = nearest(turn.allBases(), currentUnit);
+				near = nearest(notOurBases, currentUnit);
+				goals[unit_id] = near.position();
+			}
+			else if (goals[unit_id] == null)
+			{
+				near = nearest(notOurBases, currentUnit);
 				goals[unit_id] = near.position();
 			}
 			
