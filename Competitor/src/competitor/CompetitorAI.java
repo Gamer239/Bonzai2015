@@ -1,5 +1,7 @@
 package competitor;
 
+import java.security.KeyStore.Entry;
+import java.util.HashMap;
 import java.util.Set;
 
 import snowbound.api.*;
@@ -13,6 +15,7 @@ public class CompetitorAI extends AI{
 	Set<Base> bases = null;
 	Position[] goals = null;
 	int numUnitsPerTeam = 0;
+	Color color = null;
 
 	Set<Base> targetBases = null;
 	Base AggressorBase = null;
@@ -28,6 +31,43 @@ public class CompetitorAI extends AI{
 				return true;
 		}
 		return false;
+	}
+	
+	private boolean canCaptureBaseWithoutStalement(Turn turn, Unit currentUnit){
+		
+		Base base = turn.baseAt(currentUnit);
+		
+		Set<Position> tilesForBase = base.coverage();
+		
+		HashMap<Team, Integer> numPerBase = new HashMap<Team, Integer>();
+		
+		for (Position p: tilesForBase){
+			if (turn.hasUnitAt(p)){
+				Unit unitAtP = turn.unitAt(p);
+				
+				if (!numPerBase.containsKey(unitAtP.team())){
+					numPerBase.put(unitAtP.team(), 1);
+				}else{
+					numPerBase.put(unitAtP.team(), numPerBase.get(unitAtP.team()) + 1);
+				}
+			}
+		}
+		
+		int ourTeam = numPerBase.get(turn.myTeam());
+		
+		for (Team t: numPerBase.keySet()){
+			if (t == turn.myTeam())
+				continue;
+			else{
+				if (numPerBase.get(t) >= ourTeam){
+					System.out.println("We cant do that! *Clap clap clap clap clap*");
+					return false;
+				}
+			}
+		}
+		
+		System.out.println("CAPTURE THAT BASE");
+		return true;
 	}
 
 	/**
@@ -56,6 +96,7 @@ public class CompetitorAI extends AI{
 			goals = new Position[numUnitsPerTeam];
 			targetBases = turn.allBases();
 			targetBases.clear();
+			color = turn.myTeam().color();
 			
 		}
 		
@@ -148,7 +189,7 @@ public class CompetitorAI extends AI{
 			}
 			
 			// If there is a nearby base that is capturable, go get it.
-			if (aggressor && !privateBases(turn) && currentUnit.snowballs() == 0 && turn.tileAt(currentUnit).snow() == 0){
+			/*if (aggressor && !privateBases(turn) && currentUnit.snowballs() == 0 && turn.tileAt(currentUnit).snow() == 0){
 				// All bases are found. 
 				Set<Tile> tilesWithSnow = retain(turn.tiles(), new TileHasSnow());
 				Set<Position> positionsWithSnow = positions(tilesWithSnow); 
@@ -159,7 +200,7 @@ public class CompetitorAI extends AI{
 					goals[unit_id] = nearest(InRangeAndSnowy, currentUnit);
 					return new MoveAction(goals[unit_id]);
 				}
-			}
+			}*/
 			
 			//gather some snow
 			if (unit_id >= 2 && turn.tileAt(currentUnit).snow() > 0)
