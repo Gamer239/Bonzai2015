@@ -255,6 +255,15 @@ public class CompetitorAI extends AI{
 			{
 				goals[unit_id] = nearest(notOurBases, currentUnit.position()).position();
 			}
+			Set<Position> enemyPositions = turn.baseAt(goals[unit_id]).coverage();
+			enemyPositions.removeAll(enemyPositions);
+			for ( Unit e : turn.enemyUnits() )
+			{
+				enemyPositions.add(e.position());
+			}
+			Set<Position> res = union(turn.baseAt(goals[unit_id]).coverage(), enemyPositions);
+			
+			//check if there is a teammate on a base
 			
 			return new MoveAction(goals[unit_id]);
 		}
