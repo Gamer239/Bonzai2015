@@ -185,7 +185,7 @@ public class CompetitorAI extends AI{
 
 			int shortestDistance = 100000000;
 			int farthestDistance = 100000000;
-			Base target = null;
+			Base target = any(turn.allBases());
 			Position targetSpawn = null;
 
 			// For all possible spawns
@@ -209,7 +209,7 @@ public class CompetitorAI extends AI{
 				// Check to make sure there is no one at that spawn point and that we are not already heading to that base
 				else if (!turn.hasUnitAt(checkSpot)){
 					// Find nearest base for this point
-					if (difference(notOurBases, targetBases) == null){
+					if (difference(notOurBases, targetBases).size() == 0){
 						continue;
 					}
 					
@@ -392,38 +392,41 @@ public class CompetitorAI extends AI{
 
 
 			//check if the base that your going for is taken already
-			if (turn.baseAt(goals[unit_id]).isOwnedBy(turn.myTeam()))
+			if (turn.hasBaseAt(goals[unit_id]) == true )
 			{
-				goals[unit_id] = nearest(notOurBases, currentUnit.position()).position();
-			}
-			Set<Position> enemyPositions = turn.baseAt(goals[unit_id]).coverage();
-			enemyPositions.removeAll(enemyPositions);
-			for ( Unit e : turn.myUnits() )
-			{
-				enemyPositions.add(e.position());
-			}
-			Set<Position> res = union(turn.baseAt(goals[unit_id]).coverage(), enemyPositions);
-
-			if (res.size() != turn.baseAt(goals[unit_id]).coverage().size())
-			{
-				System.out.println("size on target base " + res.size());
-				boolean flag = true;
-				int j = 0;
-				while(flag && j < 50)
+				if (turn.hasBaseAt(goals[unit_id]) == true && turn.baseAt(goals[unit_id]).isOwnedBy(turn.myTeam()))
 				{
-					goals[unit_id] = getBestBase(turn, currentUnit, aggressor).position();
-					flag = false;
-					for ( int i = 0; i < numUnitsPerTeam; i++ )
+					goals[unit_id] = nearest(notOurBases, currentUnit.position()).position();
+				}
+				Set<Position> enemyPositions = turn.baseAt(goals[unit_id]).coverage();
+				enemyPositions.removeAll(enemyPositions);
+				for ( Unit e : turn.myUnits() )
+				{
+					enemyPositions.add(e.position());
+				}
+				Set<Position> res = union(turn.baseAt(goals[unit_id]).coverage(), enemyPositions);
+	
+				if (res.size() != turn.baseAt(goals[unit_id]).coverage().size())
+				{
+					System.out.println("size on target base " + res.size());
+					boolean flag = true;
+					int j = 0;
+					while(flag && j < 50)
 					{
-						if ( goals[i] == goals[unit_id])
+						goals[unit_id] = getBestBase(turn, currentUnit, aggressor).position();
+						flag = false;
+						for ( int i = 0; i < numUnitsPerTeam; i++ )
 						{
-							flag = true;
+							if ( goals[i] == goals[unit_id])
+							{
+								flag = true;
+							}
 						}
-					}
-					j++;
-					if (j > 5)
-					{
-						goals[unit_id] = any(notOurBases).position();
+						j++;
+						if (j > 5)
+						{
+							goals[unit_id] = any(notOurBases).position();
+						}
 					}
 				}
 			}
