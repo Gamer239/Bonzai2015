@@ -168,8 +168,6 @@ public class CompetitorAI extends AI{
 		// List all not-our bases
 		Set<Base> notOurBases = difference(bases, turn.myBases()); 
 
-
-
 		if (!currentUnit.isSpawned()){
 			// Find the correct perk
 			Perk newPerk;
@@ -184,8 +182,6 @@ public class CompetitorAI extends AI{
 				newPerk = Perk.CLEATS;
 				System.out.println("Cleats");
 			}
-
-
 
 			int shortestDistance = 100000000;
 			int farthestDistance = 100000000;
@@ -213,6 +209,10 @@ public class CompetitorAI extends AI{
 				// Check to make sure there is no one at that spawn point and that we are not already heading to that base
 				else if (!turn.hasUnitAt(checkSpot)){
 					// Find nearest base for this point
+					if (difference(notOurBases, targetBases) == null){
+						continue;
+					}
+					
 					Base nearest = nearest(difference(notOurBases,targetBases), checkSpot);
 					int distance = nearest.position().distance(checkSpot);
 					// Check to see if this is the shortest path
