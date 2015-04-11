@@ -10,6 +10,7 @@ import static snowbound.api.util.Utility.*;
 public class CompetitorAI extends AI{
 
 	Set<Position> spawns = null;
+	Set<Base> bases = null;
 
 	public CompetitorAI(){
 
@@ -23,6 +24,7 @@ public class CompetitorAI extends AI{
 		// Setup
 		if (spawns == null){
 			spawns = turn.myTeam().spawns();
+			bases = turn.allBases();
 		}
 
 		Unit currentUnit = turn.actor();
@@ -43,7 +45,16 @@ public class CompetitorAI extends AI{
 			}
 			return null;
 		}else{
-			return null;
+		
+			
+			// Standing on a base
+			if (turn.hasBaseAt(currentUnit.position())){
+				return new CaptureAction();
+			}
+			
+			// If there is an empty base, go after it.
+			Base near = nearest(turn.allBases(), currentUnit);
+			return new MoveAction(near.position());
 		}
 
 
