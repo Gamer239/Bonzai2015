@@ -339,6 +339,25 @@ public class CompetitorAI extends AI{
 				}
 			}
 			
+			if ( turn.hasBaseAt(currentUnit.position()) && canCaptureBaseWithoutStalement(turn, currentUnit) == false )
+			{
+				boolean flag = true;
+				int j = 0;
+				while(flag && j < 50)
+				{
+					goals[unit_id] = any(notOurBases).position();
+					flag = false;
+					for ( int i = 0; i < numUnitsPerTeam; i++ )
+					{
+						if ( goals[i] == goals[unit_id])
+						{
+							flag = true;
+						}
+					}
+					j++;
+				}
+			}
+			
 			//check if there is a teammate on a base
 			
 			return new MoveAction(goals[unit_id]);
