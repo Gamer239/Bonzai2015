@@ -240,8 +240,14 @@ public class CompetitorAI extends AI{
 				aggressor = true;
 			}
 			
+			// Standing on a base
+			if (turn.hasBaseAt(currentUnit.position()) && !turn.baseAt(currentUnit.position()).isOwnedBy(turn.myTeam()))
+			{
+				return new CaptureAction();
+			}
+			
 			// If there is a nearby base that is capturable, go get it.
-			/*if (aggressor && !privateBases(turn) && currentUnit.snowballs() == 0 && turn.tileAt(currentUnit).snow() == 0){
+			if (aggressor && !privateBases(turn) && currentUnit.snowballs() == 0 && turn.tileAt(currentUnit).snow() == 0  &&currentUnit.position().distance(goals[unit_id]) > 7){
 				// All bases are found. 
 				Set<Tile> tilesWithSnow = retain(turn.tiles(), new TileHasSnow());
 				Set<Position> positionsWithSnow = positions(tilesWithSnow); 
@@ -249,13 +255,14 @@ public class CompetitorAI extends AI{
 				Set<Position> InRangeAndSnowy = intersect(positionsWithSnow, inMoveRange);
 				if (InRangeAndSnowy.size() > 0){
 					// May be cases where you arent in range of snow
-					//goals[unit_id] = nearest(InRangeAndSnowy, currentUnit);
-					//return new MoveAction(goals[unit_id]);
+					goals[unit_id] = nearest(InRangeAndSnowy, currentUnit);
+					return new MoveAction(goals[unit_id]);
 				}
-			}*/
+			}
+			
 			
 			//gather some snow
-			if (/*unit_id >= 2 &&*/ turn.tileAt(currentUnit).snow() > 0 && currentUnit.position().distance(goals[unit_id]) > 5)
+			if (/*unit_id >= 2 &&*/ turn.tileAt(currentUnit).snow() > 0 && currentUnit.position().distance(goals[unit_id]) > 4)
 			{
 				System.out.println("gather");
 				return new GatherAction();
@@ -283,11 +290,7 @@ public class CompetitorAI extends AI{
 				return new ThrowAction(targetUnit.position());
 			}
 			
-			// Standing on a base
-			if (turn.hasBaseAt(currentUnit.position()) && !turn.baseAt(currentUnit.position()).isOwnedBy(turn.myTeam()))
-			{
-				return new CaptureAction();
-			}
+			
 
 
 			// If there is an empty base, go after it.
@@ -375,7 +378,7 @@ public class CompetitorAI extends AI{
 			
 			
 				
-			if (currentUnit.position().distance(nearest(notOurBases, currentUnit.position()).position()) < 4)
+			if (currentUnit.position().distance(nearest(notOurBases, currentUnit.position()).position()) <= 4)
 			{
 				boolean flag = false;
 				for ( int i = 0; i < numUnitsPerTeam; i++ )
