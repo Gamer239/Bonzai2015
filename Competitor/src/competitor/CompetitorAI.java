@@ -197,13 +197,13 @@ public class CompetitorAI extends AI{
 				Set<Position> InRangeAndSnowy = intersect(positionsWithSnow, inMoveRange);
 				if (InRangeAndSnowy.size() > 0){
 					// May be cases where you arent in range of snow
-					goals[unit_id] = nearest(InRangeAndSnowy, currentUnit);
-					return new MoveAction(goals[unit_id]);
+					//goals[unit_id] = nearest(InRangeAndSnowy, currentUnit);
+					//return new MoveAction(goals[unit_id]);
 				}
 			}*/
 			
 			//gather some snow
-			if (unit_id >= 2 && turn.tileAt(currentUnit).snow() > 0)
+			if (/*unit_id >= 2 &&*/ turn.tileAt(currentUnit).snow() > 0 && currentUnit.position().distance(goals[unit_id]) > 5)
 			{
 				System.out.println("gather");
 				return new GatherAction();
@@ -236,10 +236,7 @@ public class CompetitorAI extends AI{
 			{
 				return new CaptureAction();
 			}
-			else
-			{
-				//goals[unit_id] = nearest(notOurBases, currentUnit).position();
-			}
+
 
 			// If there is an empty base, go after it.
 			
@@ -298,11 +295,49 @@ public class CompetitorAI extends AI{
 			}
 			Set<Position> enemyPositions = turn.baseAt(goals[unit_id]).coverage();
 			enemyPositions.removeAll(enemyPositions);
-			for ( Unit e : turn.enemyUnits() )
+			for ( Unit e : turn.myUnits() )
 			{
 				enemyPositions.add(e.position());
 			}
 			Set<Position> res = union(turn.baseAt(goals[unit_id]).coverage(), enemyPositions);
+			
+			if (res.size() != turn.baseAt(goals[unit_id]).coverage().size())
+			{
+				System.out.println("size on target base " + res.size());
+				boolean flag = true;
+				int j = 0;
+				while(flag && j < 50)
+				{
+					goals[unit_id] = any(notOurBases).position();
+					flag = false;
+					for ( int i = 0; i < numUnitsPerTeam; i++ )
+					{
+						if ( goals[i] == goals[unit_id])
+						{
+							flag = true;
+						}
+					}
+					j++;
+				}
+			}
+			
+			
+				
+			if (currentUnit.position().distance(nearest(notOurBases, currentUnit.position()).position()) < 4)
+			{
+				boolean flag = false;
+				for ( int i = 0; i < numUnitsPerTeam; i++ )
+				{
+					if ( goals[i] == nearest(notOurBases, currentUnit.position()).position())
+					{
+						flag = true;
+					}
+				}
+				if (flag == false)
+				{
+					goals[unit_id] = nearest(notOurBases, currentUnit.position()).position();
+				}
+			}
 			
 			//check if there is a teammate on a base
 			
