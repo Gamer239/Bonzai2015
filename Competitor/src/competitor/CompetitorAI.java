@@ -252,6 +252,29 @@ public class CompetitorAI extends AI{
 			if (currentUnit.perk() == Perk.BUCKET || currentUnit.perk() == Perk.LAYERS){
 				aggressor = true;
 			}
+			
+			if ( turn.hasBaseAt(currentUnit.position()) && canCaptureBaseWithoutStalement(turn, currentUnit) == false )
+			{
+				boolean flag = true;
+				int j = 0;
+				while(flag && j < 50)
+				{
+					goals[unit_id] = getBestBase(turn, currentUnit, aggressor).position();
+					flag = false;
+					for ( int i = 0; i < numUnitsPerTeam; i++ )
+					{
+						if ( goals[i] == goals[unit_id])
+						{
+							flag = true;
+						}
+					}
+					j++;
+					if (j > 5)
+					{
+						goals[unit_id] = any(notOurBases).position();
+					}
+				}
+			}
 
 			// Standing on a base
 			if (turn.hasBaseAt(currentUnit.position()) && !turn.baseAt(currentUnit.position()).isOwnedBy(turn.myTeam()))
@@ -340,7 +363,7 @@ public class CompetitorAI extends AI{
 
 			}
 			// go find a base that no one else is using
-			else if (goals[unit_id] == null)
+			else if (goals[unit_id] == null || currentUnit.isSpawned() == false)
 			{
 				boolean flag = true;
 				int j = 0;
@@ -360,6 +383,10 @@ public class CompetitorAI extends AI{
 					{
 						goals[unit_id] = any(notOurBases).position();
 					}
+				}
+				if (goals[unit_id] == null)
+				{
+					goals[unit_id] = any(turn.allBases()).position();
 				}
 			}
 
@@ -419,28 +446,7 @@ public class CompetitorAI extends AI{
 				}
 			}
 
-			if ( turn.hasBaseAt(currentUnit.position()) && canCaptureBaseWithoutStalement(turn, currentUnit) == false )
-			{
-				boolean flag = true;
-				int j = 0;
-				while(flag && j < 50)
-				{
-					goals[unit_id] = getBestBase(turn, currentUnit, aggressor).position();
-					flag = false;
-					for ( int i = 0; i < numUnitsPerTeam; i++ )
-					{
-						if ( goals[i] == goals[unit_id])
-						{
-							flag = true;
-						}
-					}
-					j++;
-					if (j > 5)
-					{
-						goals[unit_id] = any(notOurBases).position();
-					}
-				}
-			}
+			
 
 			//check if there is a teammate on a base
 
