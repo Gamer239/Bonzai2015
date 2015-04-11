@@ -2,6 +2,7 @@ package competitor;
 
 import java.security.KeyStore.Entry;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import snowbound.api.*;
@@ -68,6 +69,57 @@ public class CompetitorAI extends AI{
 		
 		System.out.println("CAPTURE THAT BASE");
 		return true;
+	}
+	
+	private Base getBestBase(Turn turn, Unit currentUnit, boolean aggressive){
+		
+		Set<Base> bases = difference(turn.allBases(), turn.myBases());
+		
+		int maxNumEnemies = 1000000000;
+		Set<Base> bestBase = new HashSet<Base>();
+		
+		for (Base base: bases){
+			Set<Tile> allTiles = turn.tiles();
+			
+			int numEnemiesAtThisBase = 0;
+			
+			for (Tile t: allTiles){
+				
+				// TODO Tweak here as needed
+				if (t.position().distance(base.position()) <=4){
+					// Acceptable distance to check 
+					if (turn.hasUnitAt(t)){
+						// Unit at t.
+						Unit unit = turn.unitAt(t);
+						
+						if (unit.team() != turn.myTeam()){
+							numEnemiesAtThisBase += 1;
+						}
+					}
+				}
+			}
+			
+			if (numEnemiesAtThisBase < maxNumEnemies){
+				bestBase.clear();
+				bestBase.add(base);
+			}else if (numEnemiesAtThisBase == maxNumEnemies){
+				bestBase.add(base);
+			}
+		}
+		
+		int randomBase = (int)(Math.random() * bestBase.size());
+		int numBasesLookedAt = 0;
+		
+		for (Base base: bestBase){
+			if (numBasesLookedAt == randomBase){
+				return base;
+			}else{
+				numBasesLookedAt ++;
+			}
+		}
+		
+		
+		return any(difference(turn.allBases(), turn.myBases()));
 	}
 
 	/**
