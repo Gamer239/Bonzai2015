@@ -321,7 +321,7 @@ public class CompetitorAI extends AI{
 				int j = 0;
 				while(flag && j < 50)
 				{
-					goals[unit_id] = any(notOurBases).position();
+					goals[unit_id] = getBestBase(turn, currentUnit, aggressor).position();
 					flag = false;
 					for ( int i = 0; i < numUnitsPerTeam; i++ )
 					{
@@ -331,6 +331,10 @@ public class CompetitorAI extends AI{
 						}
 					}
 					j++;
+					if (j > 5)
+					{
+						goals[unit_id] = any(notOurBases).position();
+					}
 				}
 
 			}
@@ -341,7 +345,7 @@ public class CompetitorAI extends AI{
 				int j = 0;
 				while(flag && j < 50)
 				{
-					goals[unit_id] = any(notOurBases).position();
+					goals[unit_id] = getBestBase(turn, currentUnit, aggressor).position();
 					flag = false;
 					for ( int i = 0; i < numUnitsPerTeam; i++ )
 					{
@@ -351,6 +355,10 @@ public class CompetitorAI extends AI{
 						}
 					}
 					j++;
+					if (j > 5)
+					{
+						goals[unit_id] = any(notOurBases).position();
+					}
 				}
 			}
 
@@ -375,7 +383,7 @@ public class CompetitorAI extends AI{
 				int j = 0;
 				while(flag && j < 50)
 				{
-					goals[unit_id] = any(notOurBases).position();
+					goals[unit_id] = getBestBase(turn, currentUnit, aggressor).position();
 					flag = false;
 					for ( int i = 0; i < numUnitsPerTeam; i++ )
 					{
@@ -385,6 +393,10 @@ public class CompetitorAI extends AI{
 						}
 					}
 					j++;
+					if (j > 5)
+					{
+						goals[unit_id] = any(notOurBases).position();
+					}
 				}
 			}
 
@@ -412,7 +424,7 @@ public class CompetitorAI extends AI{
 				int j = 0;
 				while(flag && j < 50)
 				{
-					goals[unit_id] = any(notOurBases).position();
+					goals[unit_id] = getBestBase(turn, currentUnit, aggressor).position();
 					flag = false;
 					for ( int i = 0; i < numUnitsPerTeam; i++ )
 					{
@@ -422,6 +434,10 @@ public class CompetitorAI extends AI{
 						}
 					}
 					j++;
+					if (j > 5)
+					{
+						goals[unit_id] = any(notOurBases).position();
+					}
 				}
 			}
 
